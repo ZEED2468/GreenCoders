@@ -1,4 +1,8 @@
 import { Link } from 'react-router-dom';
+<<<<<<< HEAD
+=======
+import logo from '../../assets/logo.png';
+>>>>>>> backup-docker-nginx
 
 export function Logo({ 
   size = 'default', 
@@ -23,7 +27,11 @@ export function Logo({
   return (
     <Link to={linkTo} className={`flex items-center space-x-2 ${className}`}>
       <img 
+<<<<<<< HEAD
         src='/logo.png'
+=======
+        src={logo} 
+>>>>>>> backup-docker-nginx
         alt="GreenCoders Logo" 
         className={`${sizeClasses[size]} w-auto`} 
       />

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./app/(landing)/page";
 import ExplorePage from "./app/(landing)/explore/page";
@@ -13,6 +14,20 @@ import { ToastProvider } from "./components/providers/ToastProvider";
 import Cart from "./app/cart(payment)/Cart";
 import Payment from "./app/cart(payment)/Payment";
 import { AuthRoute, RegistrationFlowRoute } from './components/auth/ProtectedRoute';
+=======
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './app/(landing)/page';
+import ExplorePage from './app/(landing)/explore/page';
+import LoginPage from './app/(auth)/login/page';
+import RegisterPage from './app/(auth)/register/page';
+import ForgotPasswordPage from './app/(auth)/forgot-password/page';
+import ResetPasswordPage from './app/(auth)/reset-password/page';
+import EmailVerificationPage from './app/(auth)/email-verification/page';
+import Layout from './Layout';
+import { ProductsPage } from './components/Products';
+import NotFoundPage from './app/not-found';
+import { ToastProvider } from './components/providers/ToastProvider';
+>>>>>>> backup-docker-nginx
 
 function App() {
   return (
@@ -24,6 +39,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/products" element={<ProductsPage />} />
+<<<<<<< HEAD
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
           </Route>
@@ -61,6 +77,17 @@ function App() {
           }
           />
 
+=======
+          </Route>
+          
+          {/* Auth routes */}
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/register" element={<RegisterPage />} />
+          <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/email-verification" element={<EmailVerificationPage />} />
+          
+>>>>>>> backup-docker-nginx
           {/* 404 Not Found */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
@@ -70,4 +97,8 @@ function App() {
   );
 }
 
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> backup-docker-nginx

@@ -6,6 +6,7 @@ class AuthService {
     console.log('Register data received:', userData);
     
     const phoneNumber = userData.phoneNumber || '';
+<<<<<<< HEAD
     console.log('Raw phone number:', phoneNumber);
     
     // Clean and format phone number properly
@@ -26,6 +27,20 @@ class AuthService {
       } else {
         formattedPhoneNumber = `+234${digitsOnly}`;
       }
+=======
+    // Extract country code and phone number properly
+    const phoneMatch = phoneNumber.match(/^(\+\d{1,4})\s?(.+)$/);
+    
+    let formattedPhoneNumber;
+    if (phoneMatch) {
+      const countryCode = phoneMatch[1]; // Keep the + sign
+      const nationalNumber = phoneMatch[2].replace(/\D/g, ''); // Remove all non-digits
+      formattedPhoneNumber = countryCode + nationalNumber;
+    } else {
+      // Fallback: clean all digits and add +234 if not present
+      const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+      formattedPhoneNumber = cleanPhoneNumber.startsWith('234') ? `+${cleanPhoneNumber}` : `+234${cleanPhoneNumber}`;
+>>>>>>> backup-docker-nginx
     }
     
     console.log('Formatted phone number:', formattedPhoneNumber);
@@ -98,6 +113,7 @@ class AuthService {
     
     // Format phone number the same way as registration
     let formattedPhoneNumber;
+<<<<<<< HEAD
     const cleaned = phoneNumber.replace(/\s/g, '').replace(/[^\d+]/g, '');
     
     if (cleaned.startsWith('+')) {
@@ -109,6 +125,14 @@ class AuthService {
       } else {
         formattedPhoneNumber = `+234${digitsOnly}`;
       }
+=======
+    if (phoneNumber.startsWith('+')) {
+      formattedPhoneNumber = phoneNumber;
+    } else {
+      // Add +234 if not present
+      const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+      formattedPhoneNumber = cleanPhoneNumber.startsWith('234') ? `+${cleanPhoneNumber}` : `+234${cleanPhoneNumber}`;
+>>>>>>> backup-docker-nginx
     }
     
     const requestData = {
@@ -137,6 +161,7 @@ class AuthService {
   async resendOtp(phoneNumber) {
     // Format phone number the same way as registration
     let formattedPhoneNumber;
+<<<<<<< HEAD
     const cleaned = phoneNumber.replace(/\s/g, '').replace(/[^\d+]/g, '');
     
     if (cleaned.startsWith('+')) {
@@ -148,6 +173,14 @@ class AuthService {
       } else {
         formattedPhoneNumber = `+234${digitsOnly}`;
       }
+=======
+    if (phoneNumber.startsWith('+')) {
+      formattedPhoneNumber = phoneNumber;
+    } else {
+      // Add +234 if not present
+      const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+      formattedPhoneNumber = cleanPhoneNumber.startsWith('234') ? `+${cleanPhoneNumber}` : `+234${cleanPhoneNumber}`;
+>>>>>>> backup-docker-nginx
     }
     
     const response = await apiClient.post(API_ENDPOINTS.AUTH.RESEND_OTP, {
