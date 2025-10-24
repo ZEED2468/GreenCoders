@@ -27,6 +27,7 @@ export const useAuthStore = create(
           if (result.success) {
             set({ 
               user: result.data.user, 
+<<<<<<< HEAD
               token: result.data.token,
               isLoading: false, 
               error: null 
@@ -37,6 +38,11 @@ export const useAuthStore = create(
               localStorage.setItem('greencoders_token', result.data.token);
             }
             
+=======
+              isLoading: false, 
+              error: null 
+            });
+>>>>>>> backup-docker-nginx
             toast.success('Welcome back! You\'re now logged in.');
             return { success: true, user: result.data.user };
           } else {
