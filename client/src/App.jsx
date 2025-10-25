@@ -13,6 +13,10 @@ import { ToastProvider } from "./components/providers/ToastProvider";
 import Cart from "./app/cart(payment)/Cart";
 import Payment from "./app/cart(payment)/Payment";
 import { AuthRoute, RegistrationFlowRoute } from './components/auth/ProtectedRoute';
+import StoreReview from "./components/vendor/storeReview";
+import EmptyStore from "./components/vendor/EmptyStore";
+import StoreCreation from "./components/vendor/StoreCreation";
+import CreateStoreForm from "./components/vendor/productForm(store)/CreateStoreForm";
 
 function App() {
   return (
@@ -26,7 +30,14 @@ function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
+
+            {/* vendors pages */}
+            
           </Route>
+          <Route path="/vendor/review" element={<StoreReview />} />
+          <Route path="/vendor/empty-store" element={<EmptyStore />} />
+          <Route path="/vendor/create-store" element={<StoreCreation />} />
+          <Route path="/vendor/create-store-form" element={<CreateStoreForm />} />
 
           {/* Auth routes - only accessible when NOT authenticated */}
           <Route path="/auth/login" element={
