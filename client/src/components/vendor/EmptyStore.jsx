@@ -1,10 +1,10 @@
 import React from "react";
-import VendorNavbar from "./VendorNavbar";
+// import VendorNavbar from "./VendorNavbar";
 
 const EmptyStore = () => {
   return (
     <div className="max-h-screen flex flex-col items-center justify-center bg-white text-gray-800">
-      <VendorNavbar />
+      {/* <VendorNavbar /> */}
       {/* Main Section */}
       <main className="flex flex-col items-center text-center px-6 py-12">
         <img

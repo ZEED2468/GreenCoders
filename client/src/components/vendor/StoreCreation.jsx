@@ -2,7 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { storeSchema } from "../../lib/vendor/validation"; // adjust path if needed
-import VendorNavbar from "./VendorNavbar";
+// import VendorNavbar from "./VendorNavbar";
 
 const StoreCreation = () => {
   const {
@@ -35,7 +35,7 @@ const StoreCreation = () => {
 
   return (
     <>
-      <VendorNavbar />
+      {/* <VendorNavbar /> */}
       <div className="min-h-screen bg-white text-gray-800 flex flex-col px-8 md:px-24 py-10">
         {/* Header */}
         <header>

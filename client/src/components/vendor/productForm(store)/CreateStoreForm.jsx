@@ -1,118 +1,200 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductStoreSchema } from "../../../lib/vendor/validation";
 import CategorySelector from "./CategorySelector";
 import ProductForm from "./ProductForm";
+// import VendorNavbar from "../VendorNavbar";
 
+/* ---------------------- Fake Upload (Simulated Progress) ---------------------- */
+function fakeUpload(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const total = 800 + Math.random() * 1200;
+    let uploaded = 0;
+    const interval = 60 + Math.random() * 120;
+    const id = setInterval(() => {
+      uploaded += interval;
+      const percent = Math.min(100, Math.round((uploaded / total) * 100));
+      onProgress(percent);
+      if (percent >= 100) {
+        clearInterval(id);
+        if (Math.random() < 0.12) reject(new Error("Upload failed"));
+        else {
+          const fakeUrl = URL.createObjectURL(file);
+          resolve({ url: fakeUrl, name: file.name });
+        }
+      }
+    }, 120);
+  });
+}
+
+/* ---------------------- Main Component ---------------------- */
 export default function CreateStoreForm() {
+  const defaultCategories = ["Bags", "Smart Phones", "Shoes", "Clothing"];
+
   const {
     register,
-    handleSubmit,
     control,
-    formState: { errors },
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+    reset,
   } = useForm({
     resolver: zodResolver(ProductStoreSchema),
     defaultValues: {
-      storeName: "",
-      categoryType: "Single Category",
-      categories: [],
-      products: [{ name: "", description: "", size: "", count: "", file: null }],
+      categories: ["Bags"],
+      productsByCategory: { Bags: [] },
     },
   });
 
-  const { fields, append } = useFieldArray({
-    control,
-    name: "products",
-  });
+  const selectedCategories = watch("categories");
 
-  const onSubmit = (data) => {
-    console.log("✅ Store created:", data);
+  const fieldArrayHelpers = {};
+  for (const cat of defaultCategories) {
+    fieldArrayHelpers[cat] = useFieldArray({
+      control,
+      name: `productsByCategory.${cat}`,
+    });
+  }
+
+  const [uploads, setUploads] = useState({});
+  const setUploadState = (cat, idx, next) =>
+    setUploads((s) => ({
+      ...s,
+      [cat]: {
+        ...(s[cat] || {}),
+        [idx]: { ...(s[cat]?.[idx] || {}), ...next },
+      },
+    }));
+
+  useEffect(() => {
+    for (const cat of selectedCategories) {
+      const path = `productsByCategory.${cat}`;
+      if (!watch(path)) {
+        setValue(path, [
+          { name: "", description: "", size: "Medium", count: 1 },
+        ]);
+      }
+    }
+  }, [selectedCategories, setValue, watch]);
+
+  async function handleFileSelect(cat, idx, file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024)
+      return setUploadState(cat, idx, { status: "failed", name: file.name });
+
+    setUploadState(cat, idx, {
+      status: "uploading",
+      progress: 0,
+      name: file.name,
+    });
+    try {
+      const result = await fakeUpload(file, (p) =>
+        setUploadState(cat, idx, {
+          progress: p,
+          status: "uploading",
+          name: file.name,
+        })
+      );
+      setValue(`productsByCategory.${cat}.${idx}.fileUrl`, result.url);
+      setValue(`productsByCategory.${cat}.${idx}.fileName`, result.name);
+      setUploadState(cat, idx, { status: "success", progress: 100, ...result });
+    } catch {
+      setUploadState(cat, idx, {
+        status: "failed",
+        progress: 0,
+        name: file.name,
+      });
+    }
+  }
+
+  const onSubmit = async (data) => {
+    console.log("✅ Submitted payload:", data);
+    alert("Form submitted successfully! Check console for payload.");
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="max-w-3xl mx-auto p-8 bg-white rounded-lg shadow-sm"
-    >
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Create Store</h1>
-      <p className="text-gray-500 mb-8">
-        Kindly fill out the basic details of your store below.
-      </p>
-
-      {/* Store Name */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Store Name
-        </label>
-        <input
-          {...register("storeName")}
-          placeholder="Enter store name"
-          className={`border-2 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-1 ${
-            errors.storeName
-              ? "border-red-500 focus:ring-red-400"
-              : "border-gray-300 focus:ring-green-500"
-          }`}
-        />
-        {errors.storeName && (
-          <p className="text-red-500 text-xs mt-1">
-            {errors.storeName.message}
-          </p>
-        )}
-      </div>
-
-      {/* Category Type */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Category Type
-        </label>
-        <select
-          {...register("categoryType")}
-          className="border-2 border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:ring-green-500 focus:border-green-500"
-        >
-          <option value="Single Category">Single Category</option>
-          <option value="Multiple Categories">Multiple Categories</option>
-        </select>
-      </div>
-
-      {/* Category Selector */}
-      <CategorySelector register={register} errors={errors} />
-
-      {/* Product Details */}
-      <div className="border rounded-lg p-5 mb-8 bg-gray-50">
-        <h2 className="font-semibold text-gray-800 mb-4">Input Product Details</h2>
-        {fields.map((field, index) => (
-          <ProductForm
-            key={field.id}
-            index={index}
-            register={register}
-            errors={errors}
-          />
-        ))}
-        <button
-          type="button"
-          onClick={() => append({ name: "", description: "", size: "", count: "", file: null })}
-          className="text-green-600 text-sm font-medium hover:underline mt-2"
-        >
-          + Add More Products
-        </button>
-      </div>
-
-      {/* Buttons */}
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          className="border border-gray-300 text-gray-600 px-5 py-2 rounded-md hover:bg-gray-100"
-        >
-          Continue
-        </button>
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700"
-        >
+    <>
+      {/* <VendorNavbar /> */}
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4">
           Create Store
-        </button>
+        </h1>
+        <p className="text-gray-500 mb-8">
+          Kindly fill out the basic details of your store below.
+        </p>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CategorySelector
+            control={control}
+            errors={errors}
+            defaultCategories={defaultCategories}
+          />
+
+          {selectedCategories?.map((cat) => {
+            const helpers = fieldArrayHelpers[cat];
+            const items = (watch("productsByCategory") || {})[cat] || [];
+            return (
+              <div key={cat} className="mb-6 border rounded-lg bg-white">
+                <div className="px-6 py-4 border-b">
+                  <h3 className="font-semibold text-gray-700">{cat}</h3>
+                </div>
+                <div className="p-6">
+                  {items.map((item, idx) => (
+                    <ProductForm
+                      key={idx}
+                      cat={cat}
+                      index={idx}
+                      register={register}
+                      errors={errors}
+                      item={item}
+                      helpers={helpers}
+                      uploadState={uploads[cat]?.[idx] || {}}
+                      handleFileSelect={handleFileSelect}
+                      setUploadState={setUploadState}
+                      setValue={setValue}
+                    />
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      helpers.append({
+                        name: "",
+                        description: "",
+                        size: "Medium",
+                        count: 1,
+                      })
+                    }
+                    className="inline-flex items-center gap-2 text-green-600 text-sm mt-3"
+                  >
+                    <span className="text-2xl leading-none">+</span> Add More
+                    Products
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => reset()}
+              className="px-4 py-2 rounded border text-sm"
+            >
+              Reset
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded bg-green-600 text-white text-sm shadow"
+            >
+              {isSubmitting ? "Submitting..." : "Create Store"}
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </>
   );
 }

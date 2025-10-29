@@ -7,27 +7,27 @@ export function PreFooterShowcase() {
         <img
           src="/images(prefooter)/bigsale-3.svg"
           alt=""
-          className="absolute left-[6%] z-40 bottom-0 w-[18rem]"
+          className="hidden md:block absolute left-[4%] lg:left-[6%] z-40 bottom-0 w-[12rem] lg:w-[18rem]"
         />
         <img
           src="/images(prefooter)/bigsale-5.svg"
           alt=""
-          className="absolute left-[14rem] top-0 w-[14rem]"
+          className="hidden md:block absolute left-[6rem] lg:left-[14rem] top-0 w-[10rem] lg:w-[14rem]"
         />
         <img
           src="/images(prefooter)/bigsale-4.svg"
           alt=""
-          className="absolute left-20 bottom-1/2 w-48"
+          className="hidden md:block absolute left-0 lg:left-20 bottom-[8rem] lg:bottom-1/2 w-[10rem] lg:w-48"
         />
         <img
           src="/images(prefooter)/image-7.svg"
           alt=""
-          className="absolute right-20 top-[52%] z-40 w-64"
+          className="hidden md:block absolute right-20 top-[52%] z-40 w-64"
         />
         <img
           src="/images(prefooter)/bigsale-2.svg"
           alt=""
-          className="absolute right-0 bottom-0 w-56"
+          className="hidden md:block absolute right-0 bottom-0 w-56"
         />
 
         <div className="text-center relative z-10">

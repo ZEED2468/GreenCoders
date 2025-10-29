@@ -1,44 +1,30 @@
 import React from "react";
+import { Controller } from "react-hook-form";
 
-const categories = [
-  "Smart Phones",
-  "Bags",
-  "Shoes",
-  "Electronics",
-  "Clothing",
-  "Watches",
-  "Laptops",
-  "Accessories",
-  "Home Appliances",
-  "Furniture",
-];
-
-export default function CategorySelector({ register, errors }) {
+export default function CategorySelector({ control, errors, defaultCategories }) {
   return (
     <div className="mb-6">
-      <label className="block text-gray-700 text-sm font-medium mb-2">
-        Categories
-      </label>
-      <select
-        multiple
-        {...register("categories")}
-        className={`border-2 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-1 ${
-          errors.categories
-            ? "border-red-500 focus:ring-red-400"
-            : "border-gray-300 focus:ring-green-500"
-        }`}
-      >
-        {categories.map((cat) => (
-          <option key={cat} value={cat}>
-            {cat}
-          </option>
-        ))}
-      </select>
-      {errors.categories && (
-        <p className="text-red-500 text-xs mt-1">
-          {errors.categories.message}
-        </p>
-      )}
+      <h2 className="text-lg font-semibold text-gray-800 mb-2">Select Category</h2>
+      <div className="bg-white p-4 rounded border">
+        <Controller
+          control={control}
+          name="categories"
+          render={({ field }) => (
+            <select
+              {...field}
+              className="w-full rounded-md border px-3 py-2 text-sm bg-white shadow-sm"
+            >
+              <option value="">Select a category</option>
+              {defaultCategories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+        />
+        <p className="text-xs text-red-500 mt-2">{errors.categories?.message}</p>
+      </div>
     </div>
   );
 }

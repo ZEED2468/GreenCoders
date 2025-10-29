@@ -1,199 +1,219 @@
+import React, { useEffect, useState } from "react";
+import { emitter } from "../../lib/vendor/emitter";
 import { Link } from "react-router-dom";
-import { Heart, User, ShoppingCart, Menu, LogOut, Search } from "lucide-react";
-import { useState } from "react";
-import { useAuthActions } from "../../actions/auth.action";
-import { Logo } from "../ui/Logo";
+import { Heart, User, ShoppingCart, Search, Menu, X } from "lucide-react";
+import VendorProfile from "../vendor/VendorProfile";
 
 export function Header() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isVendorMode, setIsVendorMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, token, logout } = useAuthActions();
-  const isAuthenticated = !!token;
+
+  useEffect(() => {
+    const handleVendorModeChange = (value) => setIsVendorMode(value);
+    emitter.on("vendorModeChange", handleVendorModeChange);
+    return () => emitter.off("vendorModeChange", handleVendorModeChange);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchQuery);
-    // Implement search functionality
   };
 
   return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-28 py-4 bg-white">
-      {/* Logo */}
-      <Logo size="default" showText={true} linkTo="/" />
+    <header className="w-full flex items-center justify-between px-6 md:px-10 lg:px-16 py-4 bg-white shadow-sm border-b border-gray-200 relative z-50">
+      {/* ---------- Left: Logo ---------- */}
+      <Link to="/" className="flex items-center gap-2">
+        <img
+          src="/favicon.png"
+          alt="GreenMart Logo"
+          className="w-6 h-6 object-contain"
+        />
+        <h1 className="font-semibold text-lg text-green-700">GreenMart</h1>
+      </Link>
 
-      {/* Desktop Navigation - Centered */}
-      <div className="hidden md:flex space-x-8 absolute left-1/2 transform -translate-x-1/2">
-        <Link
-          to="/explore"
-          className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-        >
-          Shop
-        </Link>
-        <Link
-          to="/categories"
-          className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-        >
-          Categories
-        </Link>
-        <Link
-          to="/about"
-          className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-        >
-          About Us
-        </Link>
-        <Link
-          to="/contact"
-          className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-        >
-          Contact Us
-        </Link>
-      </div>
+      {/* ---------- Vendor Mode ---------- */}
+      {isVendorMode ? (
+        <div className="flex items-center gap-4">
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 p-2 sm:p-3 overflow-hidden">
+            <img
+              src="/images(vendor)/Bell.svg"
+              alt="Notifications"
+              className="w-full h-full cursor-pointer"
+            />
+            <span className="bg-[#E98E23] text-white rounded-full absolute top-0 right-0 text-[8px] px-[4px]">
+              02
+            </span>
+          </div>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#DFE4FF] p-1.5 overflow-hidden">
+            <img
+              src="/images(vendor)/user-profile-pic.svg"
+              alt="User Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <VendorProfile />
+        </div>
+      ) : (
+        <>
+          {/* ---------- Large Screens (Show All) ---------- */}
+          <div className="hidden lg:flex items-center gap-8 flex-1 justify-end">
+            {/* Nav Links */}
+            <div className="flex space-x-6 mr-4">
+              <Link
+                to="/explore"
+                className="text-gray-700 hover:text-green-600"
+              >
+                Shop
+              </Link>
+              <Link
+                to="/categories"
+                className="text-gray-700 hover:text-green-600"
+              >
+                Categories
+              </Link>
+              <Link to="/about" className="text-gray-700 hover:text-green-600">
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className="text-gray-700 hover:text-green-600"
+              >
+                Contact
+              </Link>
+            </div>
 
-      {/* Right Side - Search Bar + Icons */}
-      <div className="flex items-center space-x-4">
-        {/* Search Bar */}
-        <div className="hidden md:flex items-center">
-          <form onSubmit={handleSearch} className="relative">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            {/* Search */}
+            <form
+              onSubmit={handleSearch}
+              className="relative flex-1 max-w-xs hidden lg:block"
+            >
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 w-48 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none"
               />
-            </div>
-          </form>
-        </div>
+              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+            </form>
 
-        {/* Desktop Icons */}
-        <div className="hidden md:flex items-center space-x-4">
-          <Heart className="w-6 h-6 text-gray-600 cursor-pointer hover:text-red-500 transition-colors" />
-          {isAuthenticated ? (
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-700 font-medium">
-                Hi, {user?.name || "User"}
-              </span>
-              <button
-                onClick={logout}
-                className="p-1 text-gray-600 hover:text-red-600 transition-colors"
-                title="Logout"
+            {/* Icons */}
+            <div className="flex items-center space-x-4">
+              <Heart className="w-6 h-6 text-gray-600 hover:text-red-500 cursor-pointer" />
+              <User className="w-6 h-6 text-gray-600 hover:text-green-600 cursor-pointer" />
+              <ShoppingCart className="w-6 h-6 text-gray-600 hover:text-green-600 cursor-pointer" />
+            </div>
+          </div>
+
+          {/* ---------- Medium Screens (Search + Icons + Hamburger) ---------- */}
+          <div className="hidden md:flex lg:hidden items-center gap-4 ml-auto">
+            {/* Search */}
+            <form
+              onSubmit={handleSearch}
+              className="relative flex-1 max-w-xs hidden md:block"
+            >
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+            </form>
+
+            {/* Icons */}
+            <div className="flex items-center space-x-3">
+              <Heart className="w-6 h-6 text-gray-600 hover:text-red-500" />
+              <User className="w-6 h-6 text-gray-600 hover:text-green-600" />
+              <ShoppingCart className="w-6 h-6 text-gray-600 hover:text-green-600" />
+            </div>
+
+            {/* Hamburger */}
+            <button
+              className="p-2 rounded-md hover:bg-gray-100"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6 text-gray-700" />
+              ) : (
+                <Menu className="w-6 h-6 text-gray-700" />
+              )}
+            </button>
+          </div>
+
+          {/* ---------- Small Screens (Hamburger Only) ---------- */}
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-gray-100 ml-auto"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? (
+              <X className="w-6 h-6 text-gray-700" />
+            ) : (
+              <Menu className="w-6 h-6 text-gray-700" />
+            )}
+          </button>
+
+          {/* ---------- Dropdown Menu for Medium & Small ---------- */}
+          {isMenuOpen && (
+            <div className="absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200 flex flex-col items-center py-6 space-y-4 md:space-y-5">
+              {/* Search (Only Small) */}
+              <form
+                onSubmit={handleSearch}
+                className="relative w-11/12 max-w-sm md:hidden"
               >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <Link to="/auth/login">
-              <User className="w-6 h-6 text-gray-600 cursor-pointer hover:text-green-600 transition-colors" />
-            </Link>
-          )}
-          <ShoppingCart className="w-6 h-6 text-gray-600 cursor-pointer hover:text-green-600 transition-colors" />
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className={`md:hidden p-2 rounded-md transition-colors ${
-            isOpen ? "border border-green-500" : "hover:bg-gray-100"
-          }`}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Menu className="w-6 h-6 text-gray-700" />
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="absolute top-16 left-0 w-full bg-white shadow-lg border-t flex flex-col items-center space-y-4 py-6 md:hidden z-50">
-          <Link
-            to="/explore"
-            className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-            onClick={() => setIsOpen(false)}
-          >
-            Shop
-          </Link>
-          <Link
-            to="/categories"
-            className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-            onClick={() => setIsOpen(false)}
-          >
-            Categories
-          </Link>
-          <Link
-            to="/about"
-            className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-            onClick={() => setIsOpen(false)}
-          >
-            About Us
-          </Link>
-          <Link
-            to="/contact"
-            className="text-gray-700 hover:text-eco-600 transition-colors font-medium"
-            onClick={() => setIsOpen(false)}
-          >
-            Contact Us
-          </Link>
-
-          {/* Mobile Search */}
-          <div className="w-full px-4 pt-4 border-t border-gray-200">
-            <form onSubmit={handleSearch} className="relative">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search"
+                  placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none"
                 />
-              </div>
-            </form>
-          </div>
-
-          <div className="border-t border-gray-200 w-full pt-4 mt-4">
-            {isAuthenticated ? (
-              <div className="space-y-2 text-center">
-                <span className="block text-sm text-gray-700 font-medium">
-                  Hi, {user?.name || "User"}
-                </span>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                  }}
-                  className="block text-sm text-red-600 hover:text-red-700 font-medium"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2 text-center">
+                <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+              </form>
+              {/* Links */}
+              <div className="flex flex-col items-center space-y-4">
                 <Link
-                  to="/auth/login"
-                  className="block text-gray-700 hover:text-green-600 font-medium"
-                  onClick={() => setIsOpen(false)}
+                  to="/explore"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-700 hover:text-green-600 font-medium"
                 >
-                  Login
+                  Shop
                 </Link>
                 <Link
-                  to="/auth/register"
-                  className="block text-gray-700 hover:text-green-600 font-medium"
-                  onClick={() => setIsOpen(false)}
+                  to="/categories"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-700 hover:text-green-600 font-medium"
                 >
-                  Sign Up
+                  Categories
+                </Link>
+                <Link
+                  to="/about"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-700 hover:text-green-600 font-medium"
+                >
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-700 hover:text-green-600 font-medium"
+                >
+                  Contact
                 </Link>
               </div>
-            )}
 
-            {/* Become a Vendor Button */}
-            <div className="pt-4">
-              <button className="w-full px-6 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-green-600 hover:text-white hover:border-green-600 font-medium rounded-md transition-all duration-200">
-                Become a Vendor
-              </button>
+              {/* Icons (Only Small) */}
+              <div className="flex items-center gap-6 border-t border-gray-100 mt-4 pt-4 md:hidden">
+                <Heart className="w-6 h-6 text-gray-600 hover:text-red-500" />
+                <User className="w-6 h-6 text-gray-600 hover:text-green-600" />
+                <ShoppingCart className="w-6 h-6 text-gray-600 hover:text-green-600" />
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
-    </nav>
+    </header>
   );
 }

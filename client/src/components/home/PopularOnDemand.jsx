@@ -32,7 +32,7 @@ export function PopularOnDemand() {
           Popular on demand
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:px-[6rem] lg:px-0 md:gap-8">
           {products.map((product, index) => {
             const cardBgClass = "bg-gray-800";
             const cardStyle =
