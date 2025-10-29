@@ -93,7 +93,7 @@ export class AuthService {
     });
     const user = await this.userRepository.save(newUser);
     const otpResult = await this.generateOtp(user.phoneNumber);
-    console.log(SYS_MSG.OTP_SENT_SUCCESSFULLY);
+    //console.log(SYS_MSG.OTP_SENT_SUCCESSFULLY);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -295,11 +295,11 @@ export class AuthService {
     
     // Send welcome email after successful phone verification
     try {
-      console.log(SYS_MSG.WELCOME_EMAIL_SENDING, user.email);
+      //console.log(SYS_MSG.WELCOME_EMAIL_SENDING, user.email);
       await this.emailService.sendOnboardingEmail(user.email, user.username);
-      console.log(SYS_MSG.WELCOME_EMAIL_SENT);
+      //console.log(SYS_MSG.WELCOME_EMAIL_SENT);
     } catch (error) {
-      console.log(SYS_MSG.WELCOME_EMAIL_FAILED, error.message);
+      //console.log(SYS_MSG.WELCOME_EMAIL_FAILED, error.message);
     }
     
     return {

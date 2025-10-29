@@ -36,7 +36,6 @@ class GoogleOAuth {
   async initialize() {
     if (this.isInitialized) return;
     
-    console.log('Initializing Google OAuth...');
     await this.loadGoogleAPI();
     
     if (!this.clientId) {
@@ -44,7 +43,6 @@ class GoogleOAuth {
       throw new Error('Google Client ID not configured. Please check your environment variables.');
     }
 
-    console.log('Google Client ID found:', this.clientId ? 'Configured' : 'Not configured');
 
     try {
       // FedCM is now mandatory (September 2025), so we must enable it
@@ -68,7 +66,6 @@ class GoogleOAuth {
         }
       });
       this.isInitialized = true;
-      console.log('Google OAuth initialized successfully with FedCM enabled');
     } catch (error) {
       console.error('Failed to initialize Google OAuth:', error);
       throw new Error('Failed to initialize Google OAuth: ' + error.message);
@@ -76,7 +73,6 @@ class GoogleOAuth {
   }
 
   handleCredentialResponse(response) {
-    console.log('Google credential response received:', response);
     
     // Extract the ID token from the response
     const { credential } = response;
@@ -89,10 +85,7 @@ class GoogleOAuth {
       return;
     }
     
-    console.log('ID token extracted, length:', credential.length);
-    
     if (this.onSuccess) {
-      console.log('Calling onSuccess callback with ID token');
       this.onSuccess(credential);
     } else {
       console.warn('No onSuccess callback set');
@@ -186,12 +179,10 @@ class GoogleOAuth {
         // Use FedCM-compatible prompt method
         try {
           window.google.accounts.id.prompt((notification) => {
-            console.log('Google FedCM prompt notification:', notification);
             
             // Handle FedCM-specific notifications
             if (notification.isNotDisplayed()) {
               const reason = notification.getNotDisplayedReason();
-              console.log('FedCM prompt not displayed, reason:', reason);
               
               if (reason === 'unregistered_origin') {
                 reject(new Error('This domain is not authorized for Google sign-in. Please contact support.'));
@@ -201,14 +192,11 @@ class GoogleOAuth {
                 reject(new Error(`Sign-in failed: ${reason}`));
               }
             } else if (notification.isSkippedMoment()) {
-              console.log('FedCM prompt skipped');
               reject(new Error('Sign-in was skipped. Please try again.'));
             } else if (notification.isDismissedMoment()) {
-              console.log('FedCM prompt dismissed');
               reject(new Error('Sign-in was cancelled. Please try again.'));
             }
           });
-          console.log('Google FedCM prompt initiated');
         } catch (promptError) {
           console.error('Failed to prompt Google FedCM sign-in:', promptError);
           reject(new Error('Failed to initiate Google sign-in. Please try again.'));
@@ -280,7 +268,6 @@ class GoogleOAuth {
         const button = tempDiv.querySelector('div[role="button"]');
         if (button) {
           button.click();
-          console.log('Google button clicked');
         } else {
           reject(new Error('Failed to create Google sign-in button'));
         }

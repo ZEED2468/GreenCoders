@@ -1,99 +1,98 @@
 import { Link } from "react-router-dom";
-import { Logo } from "../ui/Logo";
+
 export function Footer() {
   return (
-    <footer className="bg-gray-100 py-[5rem]">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-gray-700 px-[7rem]">
+    <footer className="bg-gray-100 py-16">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 grid gap-10 lg:grid-cols-2 text-sm text-gray-700">
+        
+        {/* Left Section */}
         <div className="flex flex-col justify-between">
-          <img src='/company-logo.svg' alt="company-logo" className="w-[10rem] mb-[-4rem]" />
-          <span className="max-w-xs">
-            We are a trusted e-commerce website which supports eco-friendly
-            products and services
-          </span>
-          <div className="flex space-x-4 mt-4">
+          <img
+            src="/company-logo.svg"
+            alt="company-logo"
+            className="w-40 mb-2"
+          />
+          <p className="max-w-xs mb-4 md:mb-5">
+            We are a trusted e-commerce website that supports eco-friendly
+            products and services.
+          </p>
+
+          <div className="flex space-x-4 mt-4 md:mt-6">
             <Link to="/" className="hover:opacity-70">
-              <img src='/images(socials)/Twitter.svg' alt="Twitter" className="w-5 h-5" />
+              <img
+                src="/images(socials)/Twitter.svg"
+                alt="Twitter"
+                className="w-5 h-5"
+              />
             </Link>
             <Link to="/" className="hover:opacity-70">
-              <img src='/images(socials)/Facebook.svg' alt="Facebook" className="w-5 h-5" />
+              <img
+                src="/images(socials)/Facebook.svg"
+                alt="Facebook"
+                className="w-5 h-5"
+              />
             </Link>
             <Link to="/" className="hover:opacity-70">
-              <img src='/images(socials)/Tiktok.svg' alt="TikTok" className="w-5 h-5" />
+              <img
+                src="/images(socials)/Tiktok.svg"
+                alt="TikTok"
+                className="w-5 h-5"
+              />
             </Link>
           </div>
         </div>
-        <div className="flex justify-between items-center">
+
+        {/* Right Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Services */}
           <div>
-            <h3 className="font-semibold mb-3">Services</h3>
+            <h3 className="font-semibold mb-3 text-gray-800">Services</h3>
             <ul className="space-y-2">
-              <li>
-                <Link to="/bonus-program" className="hover:text-blue-500">
-                  Bonus program
-                </Link>
-              </li>
-              <li>
-                <Link to="/gift-cards" className="hover:text-blue-500">
-                  Gift cards
-                </Link>
-              </li>
-              <li>
-                <Link to="/credit-payment" className="hover:text-blue-500">
-                  Credit and payment
-                </Link>
-              </li>
-              <li>
-                <Link to="/service-contracts" className="hover:text-blue-500">
-                  Service contracts
-                </Link>
-              </li>
-              <li>
-                <Link to="/non-cash-account" className="hover:text-blue-500">
-                  Non-cash account
-                </Link>
-              </li>
-              <li>
-                <Link to="/payment" className="hover:text-blue-500">
-                  Payment
-                </Link>
-              </li>
+              {[
+                ["Bonus program", "/bonus-program"],
+                ["Gift cards", "/gift-cards"],
+                ["Credit and payment", "/credit-payment"],
+                ["Service contracts", "/service-contracts"],
+                ["Non-cash account", "/non-cash-account"],
+                ["Payment", "/payment"],
+              ].map(([label, link]) => (
+                <li key={link}>
+                  <Link to={link} className="hover:text-blue-500">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
+
+          {/* Assistance */}
           <div>
-            <h3 className="font-semibold mb-3">Assistance to the buyer</h3>
+            <h3 className="font-semibold mb-3 text-gray-800">
+              Assistance to the buyer
+            </h3>
             <ul className="space-y-2">
-              <li>
-                <Link to="/orders" className="hover:text-blue-500">
-                  Find an order
-                </Link>
-              </li>
-              <li>
-                <Link to="/delivery" className="hover:text-blue-500">
-                  Terms of delivery
-                </Link>
-              </li>
-              <li>
-                <Link to="/returns" className="hover:text-blue-500">
-                  Exchange and return of goods
-                </Link>
-              </li>
-              <li>
-                <Link to="/guarantee" className="hover:text-blue-500">
-                  Guarantee
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="hover:text-blue-500">
-                  Frequently asked questions
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="hover:text-blue-500">
-                  Terms of use of the site
-                </Link>
-              </li>
+              {[
+                ["Find an order", "/orders"],
+                ["Terms of delivery", "/delivery"],
+                ["Exchange and return of goods", "/returns"],
+                ["Guarantee", "/guarantee"],
+                ["Frequently asked questions", "/faq"],
+                ["Terms of use of the site", "/terms"],
+              ].map(([label, link]) => (
+                <li key={link}>
+                  <Link to={link} className="hover:text-blue-500">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t mt-12 pt-6 text-center text-xs text-gray-500">
+        © {new Date().getFullYear()} Green Code. All rights reserved.
       </div>
     </footer>
   );
