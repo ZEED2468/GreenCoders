@@ -23,6 +23,7 @@ import CreateStoreForm from "./components/vendor/productForm(store)/CreateStoreF
 import PersonalDetails from "./components/vendor/PersonalDetails";
 import BusinessDetails from "./components/vendor/BusinessDetails";
 import Review from "./components/vendor/Review";
+import Wishlist from "./components/ui/Wishlist";
 
 function App() {
   return (
@@ -54,6 +55,9 @@ function App() {
               element={<BusinessDetails />}
             />
             <Route path="/vendor/under-review" element={<Review />} />
+
+            {/* wishlist and recommended products */}
+            <Route path="/wishlist" element={<Wishlist />} />
           </Route>
 
           {/* Auth routes - only accessible when NOT authenticated */}
