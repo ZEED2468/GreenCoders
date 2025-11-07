@@ -28,6 +28,7 @@ export interface AuthUserResponse {
   username: string;
   email: string;
   isNumberVerified: boolean;
+  phoneNumber: string;
   authMethod?: string; // 'email' | 'google'
   role?: Role;
   isActive?: boolean;

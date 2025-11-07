@@ -55,11 +55,48 @@ export class OnboardingService {
   async register(
     registerDto: RegisterDto,
   ): Promise<BaseResponse<RegisterResponse>> {
-    // Check if user already exists
+    const username = await this.generateUniqueUsername(registerDto.email);
+    await this.validateUserDoesNotExist(registerDto);
+    const savedUser = await this.createUser(registerDto, username);
+    await this.sendPostRegistrationNotifications(savedUser);
+    return this.buildRegistrationResponse(savedUser);
+  }
+
+  /* 
+  =======================================
+  Generate Unique Username from Email
+  ========================================
+  Extracts the email prefix and ensures uniqueness by appending
+  a counter if the username already exists in the database.
+  */
+  private async generateUniqueUsername(email: string): Promise<string> {
+    const baseUsername = email.split('@')[0].toLowerCase();
+    let username = baseUsername;
+    let usernameCounter = 0;
+
+    while (true) {
+      const existingUsername = await this.userRepository.findOne({
+        where: { username },
+      });
+      if (!existingUsername) break;
+      usernameCounter++;
+      username = `${baseUsername}${usernameCounter}`;
+    }
+
+    return username;
+  }
+
+  /* 
+  =======================================
+  Validate User Does Not Exist
+  ========================================
+  Checks if a user with the same email or phone number already exists.
+  Throws ConflictException if a duplicate is found.
+  */
+  private async validateUserDoesNotExist(registerDto: RegisterDto): Promise<void> {
     const existingUser = await this.userRepository.findOne({
       where: [
         { email: registerDto.email },
-        { username: registerDto.username },
         { phoneNumber: registerDto.phoneNumber },
       ],
     });
@@ -68,47 +105,87 @@ export class OnboardingService {
       if (existingUser.email === registerDto.email) {
         throw new ConflictException(SYS_MSG.USER_ACCOUNT_EXIST);
       }
-      if (existingUser.username === registerDto.username) {
-        throw new ConflictException(SYS_MSG.USERNAME_ALREADY_TAKEN);
-      }
       if (existingUser.phoneNumber === registerDto.phoneNumber) {
         throw new ConflictException(SYS_MSG.PHONE_NUMBER_ALREADY_IN_USE);
       }
     }
+  }
 
-    // Create new user
+  /* 
+  =======================================
+  Create User Entity
+  ========================================
+  Creates and saves a new user entity with the provided registration data.
+  Password will be automatically hashed by the entity's @BeforeInsert hook.
+  */
+  private async createUser(
+    registerDto: RegisterDto,
+    username: string,
+  ): Promise<UserEntity> {
     const user = this.userRepository.create({
       email: registerDto.email,
-      password: registerDto.password, // Will be hashed by @BeforeInsert
-      username: registerDto.username,
+      password: registerDto.password,
+      username: username,
       phoneNumber: registerDto.phoneNumber,
-      firstName: registerDto.firstName,
-      lastName: registerDto.lastName,
       role: registerDto.role,
     });
 
-    const savedUser = await this.userRepository.save(user);
+    return await this.userRepository.save(user);
+  }
 
-    // Generate and send OTP after successful registration
+  /* 
+  =======================================
+  Send Post-Registration Notifications
+  ========================================
+  Orchestrates sending OTP and welcome email notifications
+  to the newly registered user.
+  */
+  private async sendPostRegistrationNotifications(user: UserEntity): Promise<void> {
+    await this.sendOtpToUser(user.phoneNumber);
+    await this.sendWelcomeEmail(user);
+  }
+
+  /* 
+  =======================================
+  Send OTP to User
+  ========================================
+  Generates and sends OTP to the user's phone number.
+  Errors are logged but do not fail the registration process.
+  */
+  private async sendOtpToUser(phoneNumber: string): Promise<void> {
     try {
-      await this.generateOtp(savedUser.phoneNumber);
+      await this.generateOtp(phoneNumber);
       this.logger.log(SYS_MSG.OTP_SENT_SUCCESSFULLY);
     } catch (error) {
       this.logger.error(SYS_MSG.OTP_SEND_FAILED, error);
     }
+  }
 
-    // Send welcome email after successful registration
+  /* 
+  =======================================
+  Send Welcome Email
+  ========================================
+  Sends a welcome email to the newly registered user.
+  Errors are logged but do not fail the registration process.
+  */
+  private async sendWelcomeEmail(user: UserEntity): Promise<void> {
     try {
-      this.logger.log(`${SYS_MSG.WELCOME_EMAIL_SENDING}: ${savedUser.email}`);
-      await this.emailService.sendOnboardingEmail(
-        savedUser.email,
-        savedUser.username,
-      );
+      this.logger.log(`${SYS_MSG.WELCOME_EMAIL_SENDING}: ${user.email}`);
+      await this.emailService.sendOnboardingEmail(user.email, user.username);
       this.logger.log(SYS_MSG.WELCOME_EMAIL_SENT);
     } catch (error) {
       this.logger.error(`${SYS_MSG.WELCOME_EMAIL_FAILED}: ${error.message}`);
     }
+  }
 
+  /* 
+  =======================================
+  Build Registration Response
+  ========================================
+  Constructs the standardized response object with user data
+  after successful registration.
+  */
+  private buildRegistrationResponse(savedUser: UserEntity): BaseResponse<RegisterResponse> {
     return {
       statusCode: HttpStatus.CREATED,
       message: SYS_MSG.USER_CREATED_SUCCESSFULLY,
@@ -117,6 +194,7 @@ export class OnboardingService {
           id: savedUser.id,
           username: savedUser.username,
           email: savedUser.email,
+          phoneNumber: savedUser.phoneNumber,
           isNumberVerified: savedUser.isNumberVerified,
           authMethod: savedUser.authMethod || 'email',
           role: savedUser.role,
@@ -178,6 +256,7 @@ export class OnboardingService {
           id: user.id,
           username: user.username,
           email: user.email,
+          phoneNumber: user.phoneNumber,
           isNumberVerified: user.isNumberVerified,
           authMethod: user.authMethod,
           role: user.role,
@@ -186,6 +265,108 @@ export class OnboardingService {
         },
       },
     };
+  }
+    /* 
+  =======================================
+  Google Authentication
+  ========================================
+  */
+  async googleAuth(googleAuthDto: GoogleAuthPayloadDto, res: Response): Promise<BaseResponse<LoginResponse>> {
+    const idToken = googleAuthDto.id_token;
+    if (!idToken) {
+      throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
+    }
+
+    try {
+      const request = await fetch(
+        `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
+      );
+      const verifyTokenResponse = await request.json();
+
+      // Check if the response contains an error
+      if (verifyTokenResponse.error || verifyTokenResponse.error_description) {
+        throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
+      }
+
+      const { email: userEmail } = verifyTokenResponse;
+
+      // Validate that we have the required email
+      if (!userEmail) {
+        throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
+      }
+
+      const user = await this.validateOrCreateGoogleUser(userEmail);
+      
+      // Generate tokens
+      const tokens = await this.authService.generateTokens(user);
+
+      // Set cookies using AuthService
+      this.authService.setAuthCookie(res, tokens.accessToken);
+
+      // Update last login
+      await this.authService.updateLastLogin(user.id);
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: SYS_MSG.LOGIN_SUCCESSFUL,
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            isNumberVerified: user.isNumberVerified,
+            authMethod: user.authMethod,
+            role: user.role,
+            isActive: user.isActive,
+            createdAt: user.createdAt?.toISOString(),
+          },
+        },
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      this.logger.error(SYS_MSG.GOOGLE_AUTH_ERROR, error);
+      throw new BadRequestException(SYS_MSG.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /* 
+  =======================================
+  Validate or Create User for Google OAuth
+  ========================================
+  */
+  private async validateOrCreateGoogleUser(email: string): Promise<UserEntity> {
+    if (!email) {
+      throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
+    }
+    
+    let user = await this.userRepository.findOne({
+      where: { email },
+    });
+    
+    if (!user) {
+      const baseUsername = email.split('@')[0];
+      const finalUsername = await this.authHelper.generateUniqueUsername(baseUsername);
+
+      // Generate a secure password for Google users
+      const googlePassword = this.authHelper.generateGooglePassword(email);
+
+      // Create user first
+      user = this.userRepository.create({
+        email,
+        username: finalUsername,
+        password: googlePassword, 
+        phoneNumber: '', // Optional for Google users
+        isNumberVerified: false, // Google users don't verify phone
+        authMethod: 'google',
+        role: Role.CUSTOMER,
+      });
+      await this.userRepository.save(user);
+    }
+
+    return user;
   }
 
   /* 
@@ -376,105 +557,4 @@ export class OnboardingService {
     };
   }
 
-  /* 
-  =======================================
-  Google Authentication
-  ========================================
-  */
-  async googleAuth(googleAuthDto: GoogleAuthPayloadDto, res: Response): Promise<BaseResponse<LoginResponse>> {
-    const idToken = googleAuthDto.id_token;
-    if (!idToken) {
-      throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
-    }
-
-    try {
-      const request = await fetch(
-        `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
-      );
-      const verifyTokenResponse = await request.json();
-
-      // Check if the response contains an error
-      if (verifyTokenResponse.error || verifyTokenResponse.error_description) {
-        throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
-      }
-
-      const { email: userEmail } = verifyTokenResponse;
-
-      // Validate that we have the required email
-      if (!userEmail) {
-        throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
-      }
-
-      const user = await this.validateOrCreateGoogleUser(userEmail);
-      
-      // Generate tokens
-      const tokens = await this.authService.generateTokens(user);
-
-      // Set cookies using AuthService
-      this.authService.setAuthCookie(res, tokens.accessToken);
-
-      // Update last login
-      await this.authService.updateLastLogin(user.id);
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: SYS_MSG.LOGIN_SUCCESSFUL,
-        data: {
-          user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            isNumberVerified: user.isNumberVerified,
-            authMethod: user.authMethod,
-            role: user.role,
-            isActive: user.isActive,
-            createdAt: user.createdAt?.toISOString(),
-          },
-        },
-      };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      this.logger.error(SYS_MSG.GOOGLE_AUTH_ERROR, error);
-      throw new BadRequestException(SYS_MSG.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  /* 
-  =======================================
-  Validate or Create User for Google OAuth
-  ========================================
-  */
-  private async validateOrCreateGoogleUser(email: string): Promise<UserEntity> {
-    if (!email) {
-      throw new BadRequestException(SYS_MSG.INVALID_CREDENTIALS);
-    }
-    
-    let user = await this.userRepository.findOne({
-      where: { email },
-    });
-    
-    if (!user) {
-      const baseUsername = email.split('@')[0];
-      const finalUsername = await this.authHelper.generateUniqueUsername(baseUsername);
-
-      // Generate a secure password for Google users
-      const googlePassword = this.authHelper.generateGooglePassword(email);
-
-      // Create user first
-      user = this.userRepository.create({
-        email,
-        username: finalUsername,
-        password: googlePassword, 
-        phoneNumber: '', // Optional for Google users
-        isNumberVerified: false, // Google users don't verify phone
-        authMethod: 'google',
-        role: Role.CUSTOMER,
-      });
-      await this.userRepository.save(user);
-    }
-
-    return user;
-  }
 }
