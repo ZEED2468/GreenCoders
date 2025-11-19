@@ -23,6 +23,9 @@ import CreateStoreForm from "./components/vendor/productForm(store)/CreateStoreF
 import PersonalDetails from "./components/vendor/PersonalDetails";
 import BusinessDetails from "./components/vendor/BusinessDetails";
 import Review from "./components/vendor/Review";
+import Wishlist from "./components/ui/Wishlist";
+import ShippingSuccess from "./app/cart(payment)/ShippingSuccess";
+import DeliveryForm from "./app/cart(payment)/DeliveryForm";
 
 function App() {
   return (
@@ -36,6 +39,8 @@ function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/payment-success" element={<ShippingSuccess />} />
+            <Route path="/delivery-form" element={<DeliveryForm />} />
 
             {/* vendors pages */}
             <Route path="/vendor/review" element={<StoreReview />} />
@@ -54,6 +59,9 @@ function App() {
               element={<BusinessDetails />}
             />
             <Route path="/vendor/under-review" element={<Review />} />
+
+            {/* wishlist and recommended products */}
+            <Route path="/wishlist" element={<Wishlist />} />
           </Route>
 
           {/* Auth routes - only accessible when NOT authenticated */}
