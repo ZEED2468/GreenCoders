@@ -12,7 +12,17 @@ import NotFoundPage from "./app/not-found";
 import { ToastProvider } from "./components/providers/ToastProvider";
 import Cart from "./app/cart(payment)/Cart";
 import Payment from "./app/cart(payment)/Payment";
-import { AuthRoute, RegistrationFlowRoute } from './components/auth/ProtectedRoute';
+import {
+  AuthRoute,
+  RegistrationFlowRoute,
+} from "./components/auth/ProtectedRoute";
+import StoreReview from "./components/vendor/storeReview";
+import EmptyStore from "./components/vendor/EmptyStore";
+import StoreCreation from "./components/vendor/StoreCreation";
+import CreateStoreForm from "./components/vendor/productForm(store)/CreateStoreForm";
+import PersonalDetails from "./components/vendor/PersonalDetails";
+import BusinessDetails from "./components/vendor/BusinessDetails";
+import Review from "./components/vendor/Review";
 
 function App() {
   return (
@@ -26,39 +36,66 @@ function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/payment" element={<Payment />} />
+
+            {/* vendors pages */}
+            <Route path="/vendor/review" element={<StoreReview />} />
+            <Route path="/vendor/empty-store" element={<EmptyStore />} />
+            <Route path="/vendor/create-store" element={<StoreCreation />} />
+            <Route
+              path="/vendor/create-store-form"
+              element={<CreateStoreForm />}
+            />
+            <Route
+              path="/vendor/personal-details"
+              element={<PersonalDetails />}
+            />
+            <Route
+              path="/vendor/business-details"
+              element={<BusinessDetails />}
+            />
+            <Route path="/vendor/under-review" element={<Review />} />
           </Route>
 
           {/* Auth routes - only accessible when NOT authenticated */}
-          <Route path="/auth/login" element={
-            <AuthRoute>
-              <LoginPage />
-            </AuthRoute>
-          } />
-          <Route path="/auth/register" element={
-            <AuthRoute>
-              <RegisterPage />
-            </AuthRoute>
-          } />
+          <Route
+            path="/auth/login"
+            element={
+              <AuthRoute>
+                <LoginPage />
+              </AuthRoute>
+            }
+          />
+          <Route
+            path="/auth/register"
+            element={
+              <AuthRoute>
+                <RegisterPage />
+              </AuthRoute>
+            }
+          />
           <Route
             path="/auth/forgot-password"
             element={
-            <AuthRoute>
-              <ForgotPasswordPage />
-            </AuthRoute>
-          }
+              <AuthRoute>
+                <ForgotPasswordPage />
+              </AuthRoute>
+            }
           />
-          <Route path="/auth/reset-password" element={
-            <AuthRoute>
-              <ResetPasswordPage />
-            </AuthRoute>
-          } />
+          <Route
+            path="/auth/reset-password"
+            element={
+              <AuthRoute>
+                <ResetPasswordPage />
+              </AuthRoute>
+            }
+          />
           <Route
             path="/auth/email-verification"
             element={
-            <RegistrationFlowRoute>
-              <EmailVerificationPage />
-            </RegistrationFlowRoute>
-          }
+              <RegistrationFlowRoute>
+                <EmailVerificationPage />
+              </RegistrationFlowRoute>
+            }
           />
 
           {/* 404 Not Found */}

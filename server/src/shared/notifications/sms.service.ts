@@ -40,7 +40,7 @@ export class SmsService {
     }
 
     const champNumber = this.formatPhoneNumber(phone);
-    console.log('📱 SMS Service - Sending OTP:', otp, 'to:', champNumber);
+    //console.log('📱 SMS Service - Sending OTP:', otp, 'to:', champNumber);
     const message = `GreenCoders
 Your verification code is ${otp}
 Verify Now
