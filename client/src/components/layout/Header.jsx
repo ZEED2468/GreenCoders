@@ -35,13 +35,13 @@ export function Header() {
       {/* ---------- Vendor Mode ---------- */}
       {isVendorMode ? (
         <div className="flex items-center gap-4">
-          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 p-2 sm:p-3 overflow-hidden">
+          <div className="w-12 h-12 rounded-full bg-gray-200 p-3 overflow-hidden">
             <img
               src="/images(vendor)/Bell.svg"
               alt="Notifications"
-              className="w-full h-full cursor-pointer"
+              className="w-full h-full text-gray-500 cursor-pointer"
             />
-            <span className="bg-[#E98E23] text-white rounded-full absolute top-0 right-0 text-[8px] px-[4px]">
+            <span className="bg-[#E98E23] text-white rounded-full relative p-[2px] bottom-[35px] left-[12px] text-[7px]">
               02
             </span>
           </div>

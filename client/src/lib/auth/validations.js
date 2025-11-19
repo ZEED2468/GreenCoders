@@ -10,32 +10,39 @@ export const loginSchema = z.object({
 });
 
 // Register validation schema
-export const registerSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Invalid email address'),
-  phoneNumber: z
-    .string()
-    .min(1, 'Phone number is required')
-    .regex(/^\+234[\s\-]?\d{3}[\s\-]?\d{3}[\s\-]?\d{4}$/, 'Nigerian phone number must be in format +234 XXX XXX XXXX (e.g., +234 815 866 7115)')
-    .refine((val) => {
-      // Remove spaces and hyphens to check if it's a valid Nigerian number
-      const cleaned = val.replace(/[\s\-]/g, '');
-      return cleaned === '+234' + cleaned.slice(4) && cleaned.length === 14;
-    }, 'Invalid Nigerian phone number format'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-  confirmPassword: z.string().min(1, 'Please confirm your password'),
-  referralCode: z.string().optional(),
-  agreeToTerms: z.boolean().refine(val => val === true, {
-    message: 'You must agree to the terms and conditionss',
+export const registerSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, "Email is required")
+      .email("Invalid email address"),
+    phoneNumber: z
+      .string()
+      .min(1, "Phone number is required")
+      .regex(
+        /^\+234[\s\-]?\d{3}[\s\-]?\d{3}[\s\-]?\d{4}$/,
+        "Nigerian phone number must be in format +234 XXX XXX XXXX (e.g., +234 815 866 7115)"
+      )
+      .refine((val) => {
+        // Remove spaces and hyphens to check if it's a valid Nigerian number
+        const cleaned = val.replace(/[\s\-]/g, "");
+        return cleaned === "+234" + cleaned.slice(4) && cleaned.length === 14;
+      }, "Invalid Nigerian phone number format"),
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Password must contain at least one special character"
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    referralCode: z.string().optional(),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the terms and conditionss",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -168,4 +175,16 @@ export const paymentSchema = z.object({
   cvv: z.string().optional(),
 });
 
+//delivery schema
 
+export const deliverySchema = z.object({
+  fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  address: z.string().min(5, "Address is required"),
+  phone: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^[0-9+\-\s()]*$/, "Invalid phone number"),
+  region: z.string().min(1, "Region is required"),
+  city: z.string().min(1, "City is required"),
+});

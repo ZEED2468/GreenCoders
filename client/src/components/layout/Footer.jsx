@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-100 py-16">
+    <footer className="bg-[#EDEDED] py-16">
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 grid gap-10 lg:grid-cols-2 text-sm text-gray-700">
         
         {/* Left Section */}
@@ -88,11 +88,6 @@ export function Footer() {
             </ul>
           </div>
         </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t mt-12 pt-6 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} Green Code. All rights reserved.
       </div>
     </footer>
   );
